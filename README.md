@@ -35,13 +35,13 @@ Organization name can be alternate to installation ID. `git-credential-github-ap
 Type following this. This is set credential helper to git configuration in global.
 
 ```console
-$ git config --global credential.helper 'github-apps -privatekey <path to private key> -appid <App ID of GitHub Apps> -login <installation organization>'
+$ git config --global credential.helper 'github-apps -privatekey <path to private key> -appid <App ID> -login <organization>'
 ```
 
 If you want to set to repository local, you will type following this on directory of the repository.
 
 ```console
-git config --global credential.helper 'github-apps -privatekey <path to private key> -appid <App ID of GitHub Apps> -login <installation organization>'
+git config --global credential.helper 'github-apps -privatekey <path to private key> -appid <App ID> -login <organization>'
 ```
 
 ### More Options
