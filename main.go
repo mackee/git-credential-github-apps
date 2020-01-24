@@ -4,79 +4,28 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
-)
 
-const (
-	defaultAPIBaseURL    = "api.github.com"
-	defaultCacheFilename = "git-credential-github-apps-token-cache"
+	"github.com/mackee/git-credential-github-apps/githubapps"
 )
 
 func main() {
-	var (
-		privateKey     string
-		appID          int64
-		installationID int64
-		login          string
-		hostname       string
-		apibase        string
-		cachefile      string
-	)
-	cachedir, err := os.UserCacheDir()
+	runner, err := githubapps.ParseArgs()
 	if err != nil {
-		fmt.Printf("[ERROR] fail to detect cache dir: %s\n", err)
-		os.Exit(1)
-	}
-
-	flag.StringVar(&privateKey, "privatekey", "private_key.pem", "private key of GitHub Apps")
-	flag.Int64Var(&appID, "appid", 0, "App ID of GitHub Apps")
-	flag.Int64Var(&installationID, "installationid", 0, "Installation ID of organization or user on GitHub Apps")
-	flag.StringVar(&login, "login", "", "login name of organization or user. if not set -installationid, search from Installation ID by use value.")
-	flag.StringVar(&hostname, "hostname", "github.com", "hostname as using for an accessing in git")
-	flag.StringVar(&apibase, "apibase", "api.github.com", "API hostname as using for a fetching GitHub APIs")
-	flag.StringVar(
-		&cachefile, "cachefile", filepath.Join(cachedir, defaultCacheFilename),
-		"filename as save cached token",
-	)
-
-	flag.Parse()
-
-	if privateKey == "" || appID == 0 {
-		fmt.Println("[ERROR] must be set -privatekey and -appid")
-		os.Exit(1)
-	}
-	if installationID == 0 && login == "" {
-		fmt.Println("[ERROR] must be set -installationid or -login")
-		os.Exit(1)
-	}
-
-	if flag.NArg() != 1 || flag.Arg(0) != "get" {
-		os.Exit(0)
-	}
-
-	ctx := context.Background()
-
-	var options []AutherOption
-	if defaultAPIBaseURL != apibase {
-		options = append(options, WithBaseURL(apibase))
-	}
-	if installationID == 0 {
-		options = append(options, WithLogin(ctx, login))
-	} else {
-		options = append(options, WithInstallationID(installationID))
-	}
-	if cachefile != "" {
-		s, err := NewFileStore(cachefile)
-		if err != nil {
-			fmt.Printf("[ERROR] %s\n", err)
-			os.Exit(1)
+		if err == githubapps.ErrShowHelp {
+			os.Exit(0)
 		}
-		options = append(options, WithStore(s))
+		fmt.Printf("[ERROR] %s\n", err)
+		os.Exit(1)
+	}
+
+	args := runner.Args()
+	if len(args) != 1 || args[0] != "get" {
+		fmt.Printf("[ERROR] unexpected args\n")
+		os.Exit(1)
 	}
 
 	input := &credentialInput{}
@@ -84,32 +33,27 @@ func main() {
 		fmt.Printf("[ERROR] %s\n", err)
 		os.Exit(1)
 	}
-	if input.host != hostname || !strings.HasPrefix(input.protocol, "http") {
+	if input.host != runner.Hostname() || !strings.HasPrefix(input.protocol, "http") {
 		fmt.Print(input)
 		os.Exit(0)
 	}
 
-	if err := printCredential(ctx, privateKey, appID, options); err != nil {
+	token, err := runner.Run(context.Background())
+	if err != nil {
 		fmt.Printf("[ERROR] %s\n", err)
 		os.Exit(1)
 	}
 
+	printCredential(token)
+
 	os.Exit(0)
 }
 
-func printCredential(ctx context.Context, privateKey string, appID int64, options []AutherOption) error {
-	auther, err := NewAutherFromFile(privateKey, appID, options...)
-	if err != nil {
-		return err
-	}
-	token, err := auther.FetchToken(ctx)
-
+func printCredential(token string) {
 	fmt.Println("protocol=https")
 	fmt.Println("host=github.com")
 	fmt.Println("username=x-access-token")
 	fmt.Printf("password=%s\n", token)
-
-	return nil
 }
 
 type credentialInput struct {
