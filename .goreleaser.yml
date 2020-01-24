@@ -29,7 +29,7 @@ builds:
 archives:
 - id: git-credential-github-apps
   builds:
-  - git-credential-helper-github-apps
+  - git-credential-github-apps
   replacements:
     darwin: Darwin
     linux: Linux
@@ -43,6 +43,7 @@ archives:
 - id: ghawrap
   builds:
   - ghawrap
+  name_template: 'ghawrap_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   replacements:
     darwin: Darwin
     linux: Linux
