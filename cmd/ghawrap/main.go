@@ -25,11 +25,8 @@ func main() {
 		fmt.Println("[ERROR] not provides command from args. eg. ghawrap -- yourcli options...")
 		os.Exit(1)
 	}
-	name := args[0]
-	cmdArgs := args[1:]
-	if name == "--" {
-		name = args[1]
-		cmdArgs = args[2:]
+	if args[0] == "--" {
+		args = args[1:]
 	}
 
 	ctx := context.Background()
@@ -39,18 +36,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = runCommand(name, cmdArgs, []string{"GITHUB_TOKEN=" + token})
+	os.Setenv("GITHUB_TOKEN", token)
+	err = runCommand(args, os.Environ())
 	if err != nil {
 		fmt.Printf("[ERROR] %s\n", err)
 		os.Exit(1)
 	}
 }
 
-func runCommand(name string, args, envVars []string) error {
-	bin, err := exec.LookPath(name)
+func runCommand(command []string, envVars []string) error {
+	bin, err := exec.LookPath(command[0])
 	if err != nil {
 		return err
 	}
 
-	return syscall.Exec(bin, args, envVars)
+	return syscall.Exec(bin, command, envVars)
 }
