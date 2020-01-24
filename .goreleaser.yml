@@ -5,7 +5,8 @@ before:
     # you may remove this if you don't use vgo
     - go mod tidy
 builds:
-- env:
+- id: git-credential-github-apps
+  env:
   - CGO_ENABLED=0
   goos:
   - linux
@@ -13,8 +14,36 @@ builds:
   - windows
   goarch:
   - amd64
+  main: main.go
+- id: ghawrap
+  binary: ghawrap
+  env:
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  - darwin
+  - windows
+  goarch:
+  - amd64
+  main: cmd/ghawrap/main.go
 archives:
-- replacements:
+- id: git-credential-github-apps
+  builds:
+  - git-credential-helper-github-apps
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    amd64: x86_64
+  format_overrides:
+    - goos: windows
+      format: zip
+    - goos: darwin
+      format: zip
+- id: ghawrap
+  builds:
+  - ghawrap
+  replacements:
     darwin: Darwin
     linux: Linux
     windows: Windows
