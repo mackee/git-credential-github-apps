@@ -54,4 +54,4 @@ mackee, KAYAC Inc.
 
 ## License
 
-MIT.
+[MIT](./LICENSE)
