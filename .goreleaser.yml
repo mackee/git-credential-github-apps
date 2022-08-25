@@ -40,7 +40,7 @@ archives:
 - id: git-credential-github-apps
   builds:
   - git-credential-github-apps
-  name_template: '{{.Binary}}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  name_template: '{{.Binary}}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   replacements:
     darwin: Darwin
     linux: Linux
@@ -54,7 +54,7 @@ archives:
 - id: ghawrap
   builds:
   - ghawrap
-  name_template: '{{.Binary}}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  name_template: '{{.Binary}}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   replacements:
     darwin: Darwin
     linux: Linux
