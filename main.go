@@ -57,10 +57,11 @@ func printCredential(token string) {
 }
 
 type credentialInput struct {
-	host     string
-	protocol string
-	username string
-	password string
+	host           string
+	protocol       string
+	username       string
+	password       string
+	wwwauthHeaders []string
 }
 
 func (c *credentialInput) ReadFrom(r io.Reader) (int64, error) {
@@ -80,6 +81,8 @@ func (c *credentialInput) ReadFrom(r io.Reader) (int64, error) {
 			c.username = kv[1]
 		case "password":
 			c.password = kv[1]
+		case "wwwauth[]":
+			c.wwwauthHeaders = append(c.wwwauthHeaders, kv[1])
 		default:
 			return 0, fmt.Errorf("input text is invalid: input line=%s", text)
 		}
