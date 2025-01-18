@@ -1,6 +1,8 @@
 module github.com/mackee/git-credential-github-apps
 
-go 1.19
+go 1.23
+
+toolchain go1.23.5
 
 require (
 	github.com/bradleyfalzon/ghinstallation v1.1.1
