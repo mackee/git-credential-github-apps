@@ -1,5 +1,6 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
+version: 2
 before:
   hooks:
     # you may remove this if you don't use vgo
@@ -14,6 +15,11 @@ builds:
   - windows
   goarch:
   - amd64
+  - arm64
+  goarm:
+    - "6"
+  goamd64:
+    - "v2"
   main: main.go
 - id: ghawrap
   binary: ghawrap
@@ -25,16 +31,17 @@ builds:
   - windows
   goarch:
   - amd64
+  - arm64
+  goarm:
+    - "6"
+  goamd64:
+    - "v2"
   main: cmd/ghawrap/main.go
 archives:
 - id: git-credential-github-apps
   builds:
   - git-credential-github-apps
-  replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    amd64: x86_64
+  name_template: '{{.Binary}}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   format_overrides:
     - goos: windows
       format: zip
@@ -43,12 +50,7 @@ archives:
 - id: ghawrap
   builds:
   - ghawrap
-  name_template: 'ghawrap_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-  replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    amd64: x86_64
+  name_template: '{{.Binary}}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   format_overrides:
     - goos: windows
       format: zip
@@ -57,7 +59,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
